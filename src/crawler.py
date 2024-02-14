@@ -1,11 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-
-
-def cleaning_datetime_location(raw_text):
-    raw_text = raw_text.replace('Date and Venue', '').split('|')
-    datetime = ' '.join(raw_text[0:2]).strip()
-    return datetime, raw_text[-1]
+from cleaning_text import cleaning_datetime_location, cleaning_songs
 
 
 def get_title(event):
@@ -21,7 +16,10 @@ def get_image(event):
     image_details = event.find("div", class_='cell shrink show-for-large').find("picture", class_="clr-sec")
     if image_details:
         image_link = image_details.find('source')['srcset']
-        return image_link
+        if image_link:
+            return image_link
+        else:
+            return None
     return None
 
 
@@ -38,6 +36,39 @@ def get_datetime_and_location(event):
     return datetime, location
 
 
+def get_songs(all_content):
+    songs_data = {}
+    all_songs_data = []
+    program_section = all_content.find("section", class_="grid-container program-description").find("div", class_="grid-x grid-margin-x align-center")
+    inner_tag = program_section.find("div", class_="cell medium-10 large-8").find("div", class_="grid-x grid-margin-x align-right")
+    songs_tag = inner_tag.find("div", class_="cell medium-9")
+    if songs_tag:
+        all_songs = songs_tag.find_all("div", class_="program-item p")
+        for songs in all_songs:
+            songs_data['composer'], songs_data['song'] = cleaning_songs(songs.get_text(strip=True))
+            all_songs_data.append(songs_data)
+        return all_songs_data
+    else:
+        return None
+
+
+def get_performers_and_songs(event):
+    title_details = event.find("div", class_="event-text cell auto grow")
+    url = title_details.find("p", class_="event-title h3").find('a').get('href')
+    url = 'https://www.lucernefestival.ch'+url
+    try:
+        response = requests.get(url)
+    except requests.RequestException as error:
+
+        return "Request Failed, Error:{error}".format(error=error)
+
+    next_web_page = BeautifulSoup(response.text, 'html.parser')
+    all_content = next_web_page.find("div", class_="page-container event-detail-pages event-detail-page")
+
+    songs = get_songs(all_content)
+    return songs
+
+
 def crawl_data(url):
     events_data = {}
     try:
@@ -50,9 +81,11 @@ def crawl_data(url):
         events_content = web_page_html.find_all("div", class_="event-content")
 
         for event in events_content:
+            events_data['songs_and_composers'] = get_performers_and_songs(event)
             events_data['title'] = get_title(event)
             events_data['image_link'] = get_image(event)
             events_data['datetime'], events_data['location'] = get_datetime_and_location(event)
+            yield events_data
 
     else:
         return "Request failed, Error:{error}, status:{status}".format(error=response.text, status=response.status_code)
