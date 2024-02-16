@@ -17,14 +17,14 @@ def cleaning_datetime_location(raw_text):
     return date_object, time_obj, raw_text[-1]
 
 
-def cleaning_songs(raw_text):
-
-    pattern = r'\s*\([^)]*\)'
-
-    cleaned_text = re.sub(pattern, '@', raw_text).split('@')
-    cleaned_text = html.unescape(cleaned_text)
-    if cleaned_text[-1] == 'Sergei Rachmaninoff':
-        print(raw_text)
-    if len(cleaned_text) > 1:
-        return cleaned_text[0], cleaned_text[-1]
-    return None, None
+# def cleaning_songs(raw_text):
+#
+#     pattern = r'\s*\([^)]*\)'
+#
+#     cleaned_text = re.sub(pattern, '@', raw_text).split('@')
+#     cleaned_text = html.unescape(cleaned_text)
+#     if cleaned_text[-1] == 'Sergei Rachmaninoff':
+#         print(raw_text)
+#     if len(cleaned_text) > 1:
+#         return cleaned_text[0], cleaned_text[-1]
+#     return None, None

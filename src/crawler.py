@@ -1,6 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-from cleaning_text import cleaning_datetime_location, cleaning_songs
+from cleaning_text import cleaning_datetime_location
 
 
 def get_title(event):
@@ -34,7 +34,6 @@ def get_datetime_and_location(event):
         raw_text = datetime_and_location_tag.get_text(strip=True)
         if raw_text:
             date, time, location = cleaning_datetime_location(raw_text)
-            print(date, time, location)
             return date, time, location
     return None, None, None
 
@@ -71,18 +70,20 @@ def get_songs(all_content):
 def get_performers_and_songs(event):
     title_details = event.find("div", class_="event-text cell auto grow")
     url = title_details.find("p", class_="event-title h3").find('a').get('href')
+    performers = title_details.find("p", class_="event-title h3").find('a').text.split('|')
+
     url = 'https://www.lucernefestival.ch' + url
     try:
         response = requests.get(url)
     except requests.RequestException as error:
 
-        return "Request Failed, Error:{error}".format(error=error)
+        raise Exception("Request Failed, Error:{error}".format(error=error))
 
     next_web_page = BeautifulSoup(response.text, 'html.parser')
     all_content = next_web_page.find("div", class_="page-container event-detail-pages event-detail-page")
 
     songs = get_songs(all_content)
-    return songs
+    return songs, performers
 
 
 def crawl_data(url):
@@ -100,8 +101,9 @@ def crawl_data(url):
             events_data['title'] = get_title(event)
             events_data['image_link'] = get_image(event)
             events_data['date'], events_data['time'], events_data['location'] = get_datetime_and_location(event)
-            events_data['songs'] = get_performers_and_songs(event)
+            events_data['songs'], events_data['performers'] = get_performers_and_songs(event)
             yield events_data
 
     else:
-        return "Request failed, Error:{error}, status:{status}".format(error=response.text, status=response.status_code)
+        raise Exception("Request failed, Error:{error}, status:{status}".format(error=response.text,
+                                                                                status=response.status_code))
