@@ -16,7 +16,8 @@ This Commnad will install all the required packages and start the following serv
 In 'etl' container logs if you see following messages
 ```
 Scraping Started
-Scraping Done, Saving Data in Database
+Scraping Done
+Saving Data in Database
 Data Saved in Database
 ```
 This mean that the project has succeesfully scraped data and stored in postgresql. You can use pgadmin to view the data.
@@ -28,7 +29,7 @@ Project has 3 packages.
 This package has following 3 files:
 - **main.py**- This serves as the starting point of the project. Functions for scraping data and saving it into PostgreSQL are invoked from this file.
 - **crawler.py** - This file contains complete scraping code.
-- **cleaning_text**- Here, you'll find functions essential for cleaning and transforming text before it's loaded into the database.
+- **cleaning_text.py**- Here, you'll find functions essential for cleaning and transforming text before it's loaded into the database.
   
 #### db
 This package comprises the following two files:
@@ -36,7 +37,9 @@ This package comprises the following two files:
 - **models.py** - Here, you'll find the schema for the database, defining the structure of the tables and their relationships.
 
 #### tests
-This is a testing module, here you will find test cases for all the modules. I am using pytest for testing
+This is a testing module, here you will find test cases for all the modules.
+- **crawler_tests.py** - Contain tests for crawler
+- **db_tests.py** - Conntain tests for data insertion
 
 
 
