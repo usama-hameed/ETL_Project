@@ -43,5 +43,8 @@ print("Scraping Done, Saving Data in Database")
 for data in events_data:
     if isinstance(data, dict):
         save_data(data)
+    else:
+        print(data)
+        exit()
 
-print("Data Saved")
+print("Data Saved in Database")
