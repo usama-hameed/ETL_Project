@@ -24,7 +24,6 @@ class Song(Base):
     composer = Column(String)
     event_id = Column(Integer, ForeignKey('event.id'))
     event = relationship('Event', back_populates='songs')
-    performers = relationship('Performers', back_populates='song', cascade='all, delete-orphan')
 
 
 class Performers(Base):
@@ -33,9 +32,7 @@ class Performers(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)
     event_id = Column(Integer, ForeignKey('event.id'))
-    song_id = Column(Integer, ForeignKey('song.id'))
     event = relationship('Event', back_populates='performers')
-    song = relationship('Song', back_populates='performers')
 
 
 Base.metadata.create_all(engine)
