@@ -56,7 +56,7 @@ def test_url_success():
 def test_crawl_data_request_success():
     url = 'https://www.lucernefestival.ch/en/program/summer-festival-24'
 
-    data = crawl_data(url)
+    data = crawl_data(url=url)
 
     assert type(data) == types.GeneratorType
 
@@ -90,9 +90,8 @@ def test_crawl_data_request_success():
 def test_wrong_url():
     url = 'https://www.example.com'
 
-    error = crawl_data(url)
-    for e in error:
-        assert e == 'No Content Found'
+    error = crawl_data(url=url)
+    assert error == "No Content Found"
 
 
 def test_title_exist():
