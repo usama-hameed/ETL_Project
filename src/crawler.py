@@ -3,6 +3,24 @@ from bs4 import BeautifulSoup
 from src.cleaning_text import cleaning_datetime_location
 
 
+def url_verification(crawl_data):
+    def inner(**kwargs):
+        url = kwargs['url']
+        try:
+            response = requests.get(url)
+        except requests.RequestException as error:
+            return "Request Failed, Error:{error}".format(error=error)
+        if response.status_code == 200:
+            web_page_html = BeautifulSoup(response.text, 'html.parser')
+            events_content = web_page_html.find_all("div", class_="event-content")
+            if not events_content:
+                return "No Content Found"
+            return crawl_data(events_content)
+        else:
+            return "Request failed, status:{status}".format(status=response.status_code)
+    return inner
+
+
 def get_title(event):
     title_details = event.find("div", class_="event-text cell auto grow")
     if title_details:
@@ -82,27 +100,12 @@ def get_performers_and_songs(event):
     return songs, performers
 
 
-def crawl_data(url):
+@url_verification
+def crawl_data(events_content):
     events_data = {}
-
-    try:
-        response = requests.get(url)
-    except requests.RequestException as error:
-        yield "Request Failed, Error:{error}".format(error=error)
-        return
-
-    if response.status_code == 200:
-        web_page_html = BeautifulSoup(response.text, 'html.parser')
-        events_content = web_page_html.find_all("div", class_="event-content")
-        if events_content:
-            for event in events_content:
-                events_data['title'] = get_title(event)
-                events_data['image_link'] = get_image(event)
-                events_data['date'], events_data['time'], events_data['location'] = get_datetime_and_location(event)
-                events_data['songs'], events_data['performers'] = get_performers_and_songs(event)
-                yield events_data
-        else:
-            yield "No Content Found"
-
-    else:
-        yield "Request failed, status:{status}".format(status=response.status_code)
+    for event in events_content:
+        events_data['title'] = get_title(event)
+        events_data['image_link'] = get_image(event)
+        events_data['date'], events_data['time'], events_data['location'] = get_datetime_and_location(event)
+        events_data['songs'], events_data['performers'] = get_performers_and_songs(event)
+        yield events_data

@@ -1,4 +1,4 @@
-from crawler import crawl_data
+from src.crawler import crawl_data
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import IntegrityError
 from db.models import Event, Song, Performers
@@ -38,13 +38,15 @@ def save_data(data):
 
 print("Scraping Started")
 events_data = crawl_data(url=URL)
-print("Scraping Done, Saving Data in Database")
+print("Scraping Done")
 
+if type(events_data) == str:
+    print(events_data)
+    exit()
+
+print("Saving Data in Database")
 for data in events_data:
     if isinstance(data, dict):
         save_data(data)
-    else:
-        print(data)
-        exit()
 
 print("Data Saved in Database")
