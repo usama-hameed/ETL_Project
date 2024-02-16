@@ -12,7 +12,6 @@ URL = 'https://www.lucernefestival.ch/en/program/summer-festival-24'
 
 
 def save_data(data):
-    song_obj_list = []
     try:
         event = Event(title=data.get('title', None), date=data.get('date', None), time=data.get('time', None),
                       location=data.get('location', None), image_url=data.get('image_link', None))
@@ -21,10 +20,9 @@ def save_data(data):
         for song_info in data['songs']:
             song_obj = Song(name=song_info.get('song', None), composer=song_info.get('composer', None), event=event)
             session.add(song_obj)
-            song_obj_list.append(song_obj)
 
-        for performer, song_obj in zip(data['performers'], song_obj_list):
-            performers = Performers(name=performer, event=event, song=song_obj)
+        for performer in data['performers']:
+            performers = Performers(name=performer, event=event)
             session.add(performers)
 
         session.commit()
